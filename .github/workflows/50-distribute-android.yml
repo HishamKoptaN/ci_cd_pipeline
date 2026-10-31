@@ -12,7 +12,7 @@ jobs:
           fetch-depth: 0
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-apk-release@v1
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-apk-release@prod
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - id: get_app_id
