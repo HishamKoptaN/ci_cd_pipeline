@@ -1,18 +1,11 @@
 name: Distribute Android
 on:
   workflow_call:
-    inputs:
-      flavor:
-        type: string
-        required: true
-    secrets:
-      FIREBASE_ADMIN_SDK:
-        required: false
 jobs:
   distribute:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: ${{ inputs.flavor }}
+    environment: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -20,7 +13,7 @@ jobs:
       - id: download
         uses: actions/download-artifact@v4
         with:
-          name: android-apk-${{ inputs.flavor }}
+          name: android-apk-${{ github.ref_name }}
           path: build/app/outputs/
         continue-on-error: true
       - run: |
@@ -37,10 +30,10 @@ jobs:
       - if: steps.find_apk.outputs.found == 'true'
         id: apk_name
         run: |
-          if [ "${{ inputs.flavor }}" = "prod" ]; then
+          if [ "${{ github.ref_name }}" = "prod" ]; then
             echo "name=android-apk" >> $GITHUB_OUTPUT
           else
-            echo "name=android-apk_${{ inputs.flavor }}" >> $GITHUB_OUTPUT
+            echo "name=android-apk_${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
       - if: steps.find_apk.outputs.found == 'true'
         uses: actions/upload-artifact@v4
@@ -50,7 +43,7 @@ jobs:
           retention-days: 30
       - id: get_app_id
         run: |
-          DART_FILE="lib/config/firebase/${{ inputs.flavor }}/firebase_options.dart"
+          DART_FILE="lib/config/firebase/${{ github.ref_name }}/firebase_options.dart"
           if [ -f "$DART_FILE" ]; then
             echo "🔍 Searching in Dart config: $DART_FILE"
             APP_ID=$(sed -n '/static const FirebaseOptions android/,/);/p' "$DART_FILE" | grep "appId:" | sed "s/.*'\([^']*\)'.*/\1/")
