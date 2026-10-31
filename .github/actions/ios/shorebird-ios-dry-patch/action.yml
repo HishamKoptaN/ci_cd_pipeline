@@ -28,7 +28,6 @@ runs:
         appstore_issuer_id: ${{ inputs.appstore_issuer_id }}
         appstore_api_key_id: ${{ inputs.appstore_api_key_id }}
         appstore_api_private_key: ${{ inputs.appstore_api_private_key }}
-        distribution_private_key: ${{ inputs.distribution_private_key_base64 }}
     - id: dry_run
       env:
         SHOREBIRD_TOKEN: ${{ inputs.shorebird_token }}

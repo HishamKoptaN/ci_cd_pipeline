@@ -12,9 +12,25 @@ jobs:
           fetch-depth: 0
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-apk-release@prod
+      - id: get-build-version
+        uses: HishamKoptaN/ci_cd_pipeline/actions/core/get-build-version@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          platform: "android"
+      - shell: bash 
+        env:
+         GRADLE_OPTS: "-Dorg.gradle.daemon=true -Dorg.gradle.caching=true -Dorg.gradle.vfs.watch=true"
+        run: |
+            shorebird android \
+            --target=lib/main.dart \
+            --artifact=apk \
+            --flutter-version=3.47.7 \
+            --flavor=${{ github.ref_name }} \
+            --dart-define=ENV=${{ github.ref_name }} \
+            --build-name=${{ steps.get-build-version.outputs.build_name }} \
+            --build-number=${{ steps.get-build-version.outputs.build_number }} \
+            --target-platform=android-arm64 \
+            -- \
+            --no-tree-shake-icons
       - id: get_app_id
         run: |
           DART_FILE="lib/config/firebase/${{ github.ref_name }}/firebase_options.dart"
