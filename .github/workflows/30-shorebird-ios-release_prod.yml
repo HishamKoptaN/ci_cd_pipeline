@@ -10,9 +10,9 @@ jobs:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
       - uses: actions/checkout@v6
-      - uses: HishamKoptaN/flutter-devops-core/.github/actions/core/setup-flutter@prod
-      - uses: HishamKoptaN/flutter-devops-core/.github/actions/core/setup-shorebird@prod
-      - uses: HishamKoptaN/flutter-devops-core/.github/actions/ios/setup-ios-signing@prod
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-flutter@prod
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-shorebird@prod
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/ios/setup-ios-signing@prod
         with:
           appstore_issuer_id: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
           appstore_api_key_id: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}

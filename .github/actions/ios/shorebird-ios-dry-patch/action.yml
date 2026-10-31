@@ -19,11 +19,11 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: HishamKoptaN/flutter-devops-core/.github/actions/core/setup-flutter@prod
-    - uses: HishamKoptaN/flutter-devops-core/.github/actions/core/setup-shorebird@prod
+    - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-flutter@prod
+    - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-shorebird@prod
       with:
         shorebird_token: ${{ inputs.shorebird_token }}   
-    - uses: HishamKoptaN/flutter-devops-core/.github/actions/ios/setup-ios-signing@prod
+    - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/ios/setup-ios-signing@prod
       with:
         appstore_issuer_id: ${{ inputs.appstore_issuer_id }}
         appstore_api_key_id: ${{ inputs.appstore_api_key_id }}

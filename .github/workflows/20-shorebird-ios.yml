@@ -21,7 +21,7 @@ jobs:
             ios/Pods
           key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock') }}
       - id: dry_run
-        uses: HishamKoptaN/flutter-devops-core/.github/actions/ios/shorebird-ios-dry-patch@prod
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/ios/shorebird-ios-dry-patch@prod
         with:
           flavor: ${{ github.ref_name }}
           shorebird_token: ${{ secrets.SHOREBIRD_TOKEN }}
@@ -32,10 +32,10 @@ jobs:
   shorebird_ios_patch:
     needs: check
     if: ${{ needs.check.outputs.build_type == 'patch' }}
-    uses: HishamKoptaN/flutter-devops-core/.github/workflows/20-shorebird-ios-patch.yml@prod
+    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/20-shorebird-ios-patch.yml@prod
     secrets: inherit
   shorebird_ios_release:
     needs: check
     if: ${{ needs.check.outputs.build_type == 'release' }}
-    uses: HishamKoptaN/flutter-devops-core/.github/workflows/30-shorebird-ios-release_prod.yml@prod
+    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/30-shorebird-ios-release_prod.yml@prod
     secrets: inherit

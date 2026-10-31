@@ -12,12 +12,12 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: HishamKoptaN/flutter-devops-core/.github/actions/android/setup-android-shorebird@prod
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
       - id: get-build-version
-        uses: HishamKoptaN/flutter-devops-core/.github/actions/core/get-build-version@prod
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/get-build-version@prod
         with:
           platform: "android"
-      - uses: HishamKoptaN/flutter-devops-core/.github/actions/cache-flutter-android@prod
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
       #- uses: nttld/setup-ndk@v1
       #  with:
       #    ndk-version: r26c
