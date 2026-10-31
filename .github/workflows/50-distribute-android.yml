@@ -30,6 +30,6 @@ jobs:
         with:
           appId: ${{ steps.get_app_id.outputs.app_id }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_ADMIN_SDK }}
-          groups: apk
+          groups: all
           file: build/app/outputs/flutter-apk/app-${{ github.ref_name }}-release.apk
         continue-on-error: true
