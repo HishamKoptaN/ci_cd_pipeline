@@ -1,10 +1,16 @@
 name: "Setup Android Shorebird Action"
 description: "Initializes Flutter, Shorebird CLI, Gradle, and dependency caches"
+inputs:
+  shorebird_token:
+    description: "Shorebird API token"
+    required: false
 runs:
   using: "composite"
   steps:
     - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-flutter@prod
     - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-shorebird@prod
+      with:
+        shorebird_token: ${{ inputs.shorebird_token }}
     - uses: actions/cache@v4
       with:
         path: |

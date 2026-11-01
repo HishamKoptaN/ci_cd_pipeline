@@ -13,14 +13,18 @@ jobs:
         with:
           fetch-depth: 0
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
+        with:
+          shorebird_token: ${{ secrets.SHOREBIRD_TOKEN }}
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
       - id: get-build-version
-        uses: HishamKoptaN/ci_cd_pipeline/actions/core/get-build-version@v1
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/get-build-version@prod
         with:
           platform: "android"
+          shorebird_token: ${{ secrets.SHOREBIRD_TOKEN }}
       - shell: bash 
         env:
          GRADLE_OPTS: "-Dorg.gradle.daemon=true -Dorg.gradle.caching=true -Dorg.gradle.vfs.watch=true"
+         SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
             shorebird android \
             --target=lib/main.dart \
