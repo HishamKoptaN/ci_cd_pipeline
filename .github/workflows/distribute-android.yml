@@ -1,0 +1,95 @@
+name: Distribute Android
+on:
+  workflow_call:
+    inputs:
+      flavor:
+        type: string
+        required: true
+    secrets:
+      FIREBASE_ADMIN_SDK:
+        required: true
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.flavor }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - id: download
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk-${{ inputs.flavor }}
+          path: build/app/outputs/flutter-apk/
+        continue-on-error: true
+
+      - run: |
+          echo "📁 Listing build outputs..."
+          find build/app/outputs -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "No flutter-apk directory found"
+
+      - id: find_apk
+        run: |
+          APK_PATH=$(find build/app/outputs/flutter-apk -name "*.apk" -type f 2>/dev/null | head -1)
+          if [ -n "$APK_PATH" ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+            echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+            echo "✅ Found APK: $APK_PATH"
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No APK found"
+          fi
+
+      - if: steps.find_apk.outputs.found == 'true'
+        id: apk_name
+        run: |
+          if [ "${{ inputs.flavor }}" = "prod" ]; then
+            echo "name=android-apk" >> $GITHUB_OUTPUT
+          else
+            echo "name=android-apk_${{ inputs.flavor }}" >> $GITHUB_OUTPUT
+          fi
+
+      - if: steps.find_apk.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.apk_name.outputs.name }}
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
+
+      - id: get_app_id
+        run: |
+          APP_ID=$(grep -o '"mobilesdk_app_id": "[^"]*"' android/app/google-services.json | sed 's/.*"mobilesdk_app_id": "\([^"]*\)".*/\1/')
+          if [ -z "$APP_ID" ]; then
+            echo "❌ Could not find mobilesdk_app_id in google-services.json"
+            exit 1
+          fi
+          echo "Found Firebase App ID: $APP_ID"
+          echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+
+      - if: steps.find_apk.outputs.found == 'true'
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ steps.get_app_id.outputs.app_id }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_ADMIN_SDK }}
+          groups: "apk"
+          file: ${{ steps.find_apk.outputs.apk_path }}
+
+      - if: steps.find_apk.outputs.found == 'true'
+        id: release_tag
+        run: |
+          if [ "${{ inputs.flavor }}" = "prod" ]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest_${{ inputs.flavor }}" >> $GITHUB_OUTPUT
+          fi
+
+      - if: steps.find_apk.outputs.found == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: ${{ inputs.flavor == 'prod' && 'Latest Release' || format('Latest {0}', inputs.flavor) }}
+          files: build/app/outputs/flutter-apk/*.apk
+          prerelease: ${{ inputs.flavor == 'dev' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
