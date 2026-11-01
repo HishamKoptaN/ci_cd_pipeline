@@ -3,7 +3,7 @@ on:
   workflow_call:
 jobs:
   deploy_android:
-   uses: ./.github/workflows/20-shorebird-deploy-google-play.yml
+   uses: ./.github/workflows/20-deploy-google-play.yml
    secrets: inherit
   #android:
   # uses: ./.github/workflows/30-shorebird-android-release.yml

@@ -1,4 +1,4 @@
-name: 20-shorebird-deploy-google-play.yml
+name: 20-deploy-google-play.yml
 on:
   workflow_call:
 jobs:

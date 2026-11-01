@@ -1,4 +1,4 @@
-name: 30-shorebird-ios-release_prod.yml
+name: 30-shorebird-ios-release.yml
 on:
   workflow_call:
 jobs:

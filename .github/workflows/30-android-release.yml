@@ -1,4 +1,4 @@
-name: 30-shorebird-android-release.yml
+name: 30-android-release.yml
 on:
   workflow_call:
 jobs:
