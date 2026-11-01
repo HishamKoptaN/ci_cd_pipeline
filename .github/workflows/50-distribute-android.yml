@@ -21,7 +21,7 @@ jobs:
         with:
           platform: "android"
           shorebird_token: ${{ secrets.SHOREBIRD_TOKEN }}
-        run: |
+      - run: |
             shorebird release android \
             --target=lib/main.dart \
             --artifact=apk \

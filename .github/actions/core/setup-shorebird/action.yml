@@ -9,5 +9,4 @@ runs:
   steps:
     - uses: shorebirdtech/setup-shorebird@v1
       with:
-        shorebird-token: ${{ inputs.shorebird_token || env.SHOREBIRD_TOKEN }}
         cache: true
