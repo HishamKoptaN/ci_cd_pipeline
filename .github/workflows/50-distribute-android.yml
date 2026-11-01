@@ -21,10 +21,6 @@ jobs:
         with:
           platform: "android"
           shorebird_token: ${{ secrets.SHOREBIRD_TOKEN }}
-      - shell: bash 
-        env:
-         GRADLE_OPTS: "-Dorg.gradle.daemon=true -Dorg.gradle.caching=true -Dorg.gradle.vfs.watch=true"
-         SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
             shorebird release android \
             --target=lib/main.dart \
