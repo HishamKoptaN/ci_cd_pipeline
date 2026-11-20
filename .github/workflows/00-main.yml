@@ -13,12 +13,9 @@ on:
 jobs: 
   auto_pr:
     if: github.ref_name != 'dev' && github.ref_name != 'prod'
-<<<<<<< HEAD
-=======
     permissions:
       contents: write
       pull-requests: write
->>>>>>> dev
     uses: ./.github/workflows/auto-pr.yml
     secrets: inherit
   prod_pipeline:
