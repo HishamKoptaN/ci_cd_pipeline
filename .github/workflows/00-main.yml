@@ -4,6 +4,7 @@ env:
   actions_allow_use_unsecure_node_version: true
 permissions:
   contents: write
+  checks: write
   pull-requests: write
 on:
   workflow_call:
@@ -19,6 +20,10 @@ jobs:
     uses: ./.github/workflows/auto-pr.yml
     secrets: inherit
   web_pipeline:
+    permissions:
+      contents: write
+      checks: write
+      pull-requests: write
     uses: ./.github/workflows/50-firebase-hosting.yml
     secrets: inherit
   prod_pipeline:
