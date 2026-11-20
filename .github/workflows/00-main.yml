@@ -1,4 +1,3 @@
-#1
 name: 00-main
 env:
   force_javascript_actions_to_node24: true
@@ -23,7 +22,6 @@ jobs:
     if: github.ref_name == 'prod'
     uses: ./.github/workflows/20-shorebird-layer.yml
     secrets: inherit
-
   dev_pipeline:
     if: github.ref_name == 'dev'
     uses: ./.github/workflows/50-distribution-layer.yml

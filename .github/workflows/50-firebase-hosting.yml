@@ -1,0 +1,35 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - prod
+      - dev
+  pull_request:
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  build_and_deploy:
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'push' && github.ref_name || github.base_ref }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          channel: "stable"
+          cache: true
+      - run: flutter build web --release --dart-define=ENV=${{ github.event_name == 'push' && github.ref_name || github.base_ref }}
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ vars.PROJECT_ID }}
+          target: ${{ vars.TARGET }}
+          # live channel on push; preview channel on pull_request
+          channelId: ${{ github.event_name == 'push' && 'live' || '' }}
