@@ -11,6 +11,9 @@ on:
   workflow_dispatch:
 jobs: 
   auto_pr:
+    permissions:
+      contents: write
+      pull-requests: write
     if: github.ref_name != 'dev' && github.ref_name != 'prod'
     uses: ./.github/workflows/auto-pr.yml
     secrets: inherit
