@@ -132,6 +132,8 @@ Distribution Layer
 
 **Files**: `build-deploy-web.yml`
 
+See [Firebase Hosting reusable workflows](docs/firebase-hosting.md) to call the web deploy flows from other projects.
+
 ---
 
 ## ⚠️ Golden Rule
