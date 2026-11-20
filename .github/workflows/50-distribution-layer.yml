@@ -5,6 +5,9 @@ jobs:
   distribute:
     uses: ./.github/workflows/50-distribute-android.yml
     secrets: inherit
+  web:
+    uses : ./.github/workflows/50-distribute-android.yml
+    secrets: inherit
   # cleanup:
   #   needs: [build_installer, distribute]
   #   if: always()
