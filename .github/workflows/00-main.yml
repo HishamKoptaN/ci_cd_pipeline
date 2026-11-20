@@ -4,6 +4,7 @@ env:
   actions_allow_use_unsecure_node_version: true
 permissions:
   contents: write
+  pull-requests: write
 on:
   workflow_call:
   push:
@@ -12,6 +13,12 @@ on:
 jobs: 
   auto_pr:
     if: github.ref_name != 'dev' && github.ref_name != 'prod'
+<<<<<<< HEAD
+=======
+    permissions:
+      contents: write
+      pull-requests: write
+>>>>>>> dev
     uses: ./.github/workflows/auto-pr.yml
     secrets: inherit
   prod_pipeline:
