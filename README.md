@@ -173,6 +173,8 @@ The project includes optimized **file nesting patterns** for clean workflow orga
 
 ## 🚀 Usage
 
+Available reusable workflows: [Firebase Hosting](docs/firebase-hosting.md), [Auto PR](docs/auto-pr.md).
+
 ### 1. Fork/Clone
 ```bash
 git clone https://github.com/YOUR_USERNAME/flutter_devops_core.git
