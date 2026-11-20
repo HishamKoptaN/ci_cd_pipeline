@@ -1,0 +1,49 @@
+name: Auto PR
+
+on:
+  workflow_call:
+    inputs:
+      destination-branch:
+        description: Branch the pull request targets.
+        type: string
+        required: false
+        default: "dev"
+      source-branch:
+        description: Branch to pull from. Defaults to the pushed branch.
+        type: string
+        required: false
+        default: ""
+      destination-repository:
+        description: Optional owner/repo to open the PR in. Defaults to the caller repository.
+        type: string
+        required: false
+        default: ""
+      pr-title:
+        description: Pull request title.
+        type: string
+        required: false
+        default: ""
+      pr-body:
+        description: Pull request body.
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pull-request:
+    if: ${{ github.ref_name != 'dev' && github.ref_name != 'prod' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: diillson/auto-pull-request@v1.0.1
+        with:
+          source_branch: ${{ inputs.source-branch || github.ref_name }}
+          destination_branch: ${{ inputs.destination-branch }}
+          destination_repository: ${{ inputs.destination-repository }}
+          pr_title: ${{ inputs.pr-title || format('Automated PR from {0}', github.ref) }}
+          pr_body: "${{ inputs.pr-body || format(':crown: *An automated PR created by AI Agent / GitHub Actions* — branch `{0}`.', github.ref) }}"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
