@@ -5,6 +5,7 @@ env:
   actions_allow_use_unsecure_node_version: true
 permissions:
   contents: write
+  pull-requests: write
 on:
   workflow_call:
   push:
