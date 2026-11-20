@@ -1,6 +1,7 @@
 name: Deploy to Firebase Hosting
 
 on:
+  workflow_call:
   push:
     branches:
       - prod
