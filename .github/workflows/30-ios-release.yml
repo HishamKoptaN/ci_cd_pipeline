@@ -9,7 +9,7 @@ jobs:
     env:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-flutter@prod
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-shorebird@prod
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/ios/setup-ios-signing@prod
