@@ -20,7 +20,7 @@ jobs:
     outputs:
       installer_name: ${{ steps.name.outputs.installer_name }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
 

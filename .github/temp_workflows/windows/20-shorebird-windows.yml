@@ -26,7 +26,7 @@ jobs:
     outputs:
       changed: ${{ steps.deploy.outputs.changed }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-flutter@prod
