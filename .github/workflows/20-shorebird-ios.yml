@@ -37,5 +37,5 @@ jobs:
   shorebird_ios_release:
     needs: check
     if: ${{ needs.check.outputs.build_type == 'release' }}
-    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/30-shorebird-ios-release_prod.yml@prod
+    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/30-ios-release.yml@prod
     secrets: inherit
