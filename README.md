@@ -132,7 +132,7 @@ Distribution Layer
 
 **Files**: `build-deploy-web.yml`
 
-See [Firebase Hosting reusable workflows](docs/firebase-hosting.md) to call the web deploy flows from other projects.
+See the [Firebase Hosting reusable workflow](docs/firebase-hosting.md) to call the web deploy flow from other projects.
 
 ---
 
@@ -174,6 +174,8 @@ The project includes optimized **file nesting patterns** for clean workflow orga
 ---
 
 ## 🚀 Usage
+
+Reusable workflows: [Firebase Hosting](docs/firebase-hosting.md), [Auto PR](docs/auto-pr.md).
 
 ### 1. Fork/Clone
 ```bash
