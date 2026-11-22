@@ -1,70 +1,67 @@
-# Firebase Hosting reusable workflows
+# Firebase Hosting reusable workflow
 
-Build and deploy Flutter web apps from any project without copying deployment steps into every repository. The logic lives in `HishamKoptaN/ci_cd_pipeline`; caller projects only keep a small trigger file.
+`50-firebase-hosting.yml` is the single source for building and deploying Flutter web to Firebase Hosting. The old `40-firebase-hosting-merge.yml` and `40-firebase-hosting-pull-request.yml` files were removed by the single-workflow refactor — do not re-add them.
 
-## Available workflows
+It is called automatically by `00-main.yml` as `web_pipeline`; most projects only need to call `00-main.yml@prod`.
 
-| Workflow | Trigger in caller | Result |
-| --- | --- | --- |
-| `40-firebase-hosting-merge.yml` | Push to `dev` / `prod` | Deploy to the live Hosting channel |
-| `40-firebase-hosting-pull-request.yml` | Pull request | Deploy a preview channel + PR comment |
+## What it does
 
-## Setup in every caller project
+- **Push**: deploys to the `live` channel; `ENV` dart-define = `github.ref_name`.
+- **PR** (non-fork): deploys a preview channel + PR comment; `ENV` = `prod` when the base branch is `prod`, otherwise `dev`.
+- **Environment**: `dev`/`prod` derived from the branch (push) or base branch (PR).
+- **Flutter version**: read from the caller's `pubspec.yaml`.
 
-1. Add repository variable `PROJECT_ID` = Firebase project id (or pass `project-id` in `with`).
-2. Add secret `FIREBASE_SERVICE_ACCOUNT` = Firebase service account JSON. It may be an environment secret: the reusable workflow sets `environment: dev/prod` itself, so environment secrets resolve correctly.
-3. Create environments named `dev` and `prod`.
-4. Grant the calling job at least `contents: write` (and `checks: write` / `pull-requests: write` for PR previews). Permissions can only be reduced inside a reusable workflow, never elevated.
-5. Allow actions and reusable workflows from `HishamKoptaN/ci_cd_pipeline` in the repository Actions settings if required.
+## Caller setup
 
-## Caller: deploy on merge
+- Repository variables: `PROJECT_ID`, `TARGET`.
+- Secret: `FIREBASE_SERVICE_ACCOUNT` (can be an environment secret).
+- Environments: `dev` and `prod`.
+- Permissions: `contents: read` (or `write` when calling `00-main`), `checks: write`, `pull-requests: write`.
 
-Create `.github/workflows/firebase-hosting-merge.yml`:
+### Option A — call 00-main (recommended)
+
+Includes Auto PR, web hosting, and the platform pipelines:
 
 ```yaml
-name: Deploy to Firebase Hosting on merge
+name: CI/CD Pipeline
 on:
   push:
-    branches: [prod, dev]
-
-permissions:
-  contents: write
-  pull-requests: write
-
-jobs:
-  deploy:
-    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/40-firebase-hosting-merge.yml@prod
-    secrets:
-      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-```
-
-Optional inputs under `with`: `flutter-version` (default `3.50.0`), `project-id` (default: caller variable `PROJECT_ID`), `channel-id` (default `live`).
-
-## Caller: preview on pull request
-
-Create `.github/workflows/firebase-hosting-pull-request.yml`:
-
-```yaml
-name: Deploy to Firebase Hosting on PR
-on: pull_request
-
+    branches: ['**']
+  workflow_dispatch:
 permissions:
   contents: write
   checks: write
   pull-requests: write
-
 jobs:
-  preview:
-    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/40-firebase-hosting-pull-request.yml@prod
+  pipeline:
+    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/00-main.yml@prod
+    secrets: inherit
+```
+
+### Option B — web only
+
+```yaml
+name: Firebase Hosting
+on:
+  push:
+    branches: [prod, dev]
+  pull_request:
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+jobs:
+  web:
+    uses: HishamKoptaN/ci_cd_pipeline/.github/workflows/50-firebase-hosting.yml@prod
     secrets:
       FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 ```
 
-Fork PRs are skipped automatically, matching the original workflow guard.
+`secrets: inherit` can be used instead for repositories under the same account/organization.
 
 ## Notes
 
-- `ENV` passed to Dart is `github.ref_name` on push and `prod`/`dev` derived from the PR base branch.
-- The `github` context inside a reusable workflow belongs to the caller, so `github.ref_name`, `github.base_ref`, `vars` and the `GITHUB_TOKEN` all come from the caller project.
-- `secrets: inherit` can replace the explicit `secrets:` block for repositories under the same account/organization.
+- The `github` context inside the called workflow belongs to the caller, so variables, secrets and `GITHUB_TOKEN` come from the caller project.
+- `checks: write` is required by the Firebase preview check; the caller job cannot grant less than the called workflow requests.
+- Fork PRs are skipped by the workflow guard.
 - Pin `@prod` to a commit SHA for maximum stability.
