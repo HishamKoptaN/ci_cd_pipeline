@@ -45,7 +45,7 @@ jobs:
             APP_ID=$(sed -n '/static const FirebaseOptions android/,/);/p' "$DART_FILE" | grep "appId:" | sed "s/.*'\([^']*\)'.*/\1/")
             if [ -n "$APP_ID" ]; then
               echo "Found Firebase App ID: $APP_ID"
-              echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+              echo "app_id=$APP_ID" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           fi

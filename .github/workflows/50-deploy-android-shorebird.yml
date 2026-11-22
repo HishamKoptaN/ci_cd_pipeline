@@ -60,10 +60,11 @@ jobs:
           sed -i "s/^app_id:.*/app_id: $TARGET_ID/" shorebird.yaml
           androidReleaseVersion="$version"
           if [ "$flavor" != "prod" ]; then
-            androidReleaseVersion=$(echo "$version" | sed "s/+/-$flavor+/")
+            androidReleaseVersion="${version/+/-$flavor+}"
           fi
           versionChanged=false
           if shorebird patch android --flavor=$flavor --build-name="$baseVersion" --release-version="$androidReleaseVersion" --dart-define=ENV=$flavor '--' --no-tree-shake-icons 2>&1 | tee /tmp/patch_output; then
+            :
           else
             if grep -qi "Release not found\|No release exists\|UnpatchableChangeException\|asset changes\|native changes" /tmp/patch_output; then
               if shorebird release android --flavor=$flavor --build-name="$baseVersion" --dart-define=ENV=$flavor '--' --no-tree-shake-icons 2>&1 | tee /tmp/release_output; then
@@ -79,7 +80,7 @@ jobs:
               exit 1
             fi
           fi
-          echo "changed=$versionChanged" >> $GITHUB_OUTPUT
+          echo "changed=$versionChanged" >> "$GITHUB_OUTPUT"
       - if: inputs.flavor == 'prod' && hashFiles('build/app/outputs/bundle/*/*.aab') != ''
         uses: actions/upload-artifact@v7
         with:

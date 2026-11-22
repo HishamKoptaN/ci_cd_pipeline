@@ -35,7 +35,6 @@ jobs:
                 git push origin --delete "$TAG" 2>/dev/null || echo "⚠️ Could not delete tag $TAG"
               fi
             done
-          else
           fi
       - env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

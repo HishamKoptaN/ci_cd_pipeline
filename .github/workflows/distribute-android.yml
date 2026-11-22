@@ -33,11 +33,11 @@ jobs:
         run: |
           APK_PATH=$(find build/app/outputs/flutter-apk -name "*.apk" -type f 2>/dev/null | head -1)
           if [ -n "$APK_PATH" ]; then
-            echo "found=true" >> $GITHUB_OUTPUT
-            echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "apk_path=$APK_PATH" >> "$GITHUB_OUTPUT"
             echo "✅ Found APK: $APK_PATH"
           else
-            echo "found=false" >> $GITHUB_OUTPUT
+            echo "found=false" >> "$GITHUB_OUTPUT"
             echo "⚠️ No APK found"
           fi
 
@@ -45,9 +45,9 @@ jobs:
         id: apk_name
         run: |
           if [ "${{ inputs.flavor }}" = "prod" ]; then
-            echo "name=android-apk" >> $GITHUB_OUTPUT
+            echo "name=android-apk" >> "$GITHUB_OUTPUT"
           else
-            echo "name=android-apk_${{ inputs.flavor }}" >> $GITHUB_OUTPUT
+            echo "name=android-apk_${{ inputs.flavor }}" >> "$GITHUB_OUTPUT"
           fi
 
       - if: steps.find_apk.outputs.found == 'true'
@@ -65,7 +65,7 @@ jobs:
             exit 1
           fi
           echo "Found Firebase App ID: $APP_ID"
-          echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+          echo "app_id=$APP_ID" >> "$GITHUB_OUTPUT"
 
       - if: steps.find_apk.outputs.found == 'true'
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -79,9 +79,9 @@ jobs:
         id: release_tag
         run: |
           if [ "${{ inputs.flavor }}" = "prod" ]; then
-            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
           else
-            echo "tag=latest_${{ inputs.flavor }}" >> $GITHUB_OUTPUT
+            echo "tag=latest_${{ inputs.flavor }}" >> "$GITHUB_OUTPUT"
           fi
 
       - if: steps.find_apk.outputs.found == 'true'

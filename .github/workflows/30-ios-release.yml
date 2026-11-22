@@ -57,10 +57,10 @@ jobs:
       - id: find_ipa
         run: |
             IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
-            echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
+            echo "ipa_path=$IPA_PATH" >> "$GITHUB_OUTPUT"
       - run: |
           IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
-          echo "FOUND_IPA=$IPA_PATH" >> $GITHUB_ENV
+          echo "FOUND_IPA=$IPA_PATH" >> "$GITHUB_ENV"
           echo "IPA File: $IPA_PATH"
       - uses: apple-actions/upload-testflight-build@v5
         with:
