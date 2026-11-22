@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,7 +19,7 @@ class UpdateChecker {
         int latestVersionCode = data['versionCode'];
         String apkUrl = data['apkUrl'];
         String releaseNotes = data['releaseNotes'];
-        if (latestVersionCode > currentVersionCode) {
+        if (latestVersionCode > currentVersionCode && context.mounted) {
           _showUpdateDialog(context, apkUrl, releaseNotes);
         }
       }

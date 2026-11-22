@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'env.dart';
 import 'envs/dev_env.dart';
 import 'envs/prod_env.dart';
@@ -15,7 +17,7 @@ class EnvConfig {
       case 'dev':
         return DevEnv();
       default:
-        print('⚠️ Unknown environment: $_envTag, defaulting to dev');
+        debugPrint('⚠️ Unknown environment: $_envTag, defaulting to dev');
         return DevEnv();
     }
   }
