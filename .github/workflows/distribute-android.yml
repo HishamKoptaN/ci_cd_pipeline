@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 1
       - id: download
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: android-apk-${{ inputs.flavor }}
           path: build/app/outputs/flutter-apk/
@@ -51,7 +51,7 @@ jobs:
           fi
 
       - if: steps.find_apk.outputs.found == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.apk_name.outputs.name }}
           path: build/app/outputs/flutter-apk/*.apk
@@ -85,7 +85,7 @@ jobs:
           fi
 
       - if: steps.find_apk.outputs.found == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.release_tag.outputs.tag }}
           name: ${{ inputs.flavor == 'prod' && 'Latest Release' || format('Latest {0}', inputs.flavor) }}

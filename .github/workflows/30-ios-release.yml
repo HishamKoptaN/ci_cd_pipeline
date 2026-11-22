@@ -17,19 +17,19 @@ jobs:
           appstore_issuer_id: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
           appstore_api_key_id: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
           appstore_api_private_key: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             ~/Library/Caches/swift-package-manager
             ~/Library/Developer/Xcode/DerivedData
           key: ${{ runner.os }}-pods-swift-${{ hashFiles('ios/Podfile.lock') }}
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             build/
             .dart_tool/
           key: ${{ runner.os }}-flutter-build-${{ hashFiles('pubspec.lock') }}-${{ github.sha }}
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.cocoapods
@@ -62,7 +62,7 @@ jobs:
           IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
           echo "FOUND_IPA=$IPA_PATH" >> $GITHUB_ENV
           echo "IPA File: $IPA_PATH"
-      - uses: apple-actions/upload-testflight-build@v4
+      - uses: apple-actions/upload-testflight-build@v5
         with:
            app-path: ${{ env.FOUND_IPA }}
            issuer-id: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
