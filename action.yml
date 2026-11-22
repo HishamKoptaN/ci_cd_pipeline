@@ -12,7 +12,7 @@ runs:
           path: actions/core/setup-flutter
       - uses: HishamKoptaN/ci_cd_pipeline/actions/core/setup-flutter@prod
       - uses: HishamKoptaN/ci_cd_pipeline/actions/core/setup-shorebird@prod
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: build/
           key: ${{ runner.os}}-${{ github.ref_name }}    
