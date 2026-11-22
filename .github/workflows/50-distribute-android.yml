@@ -4,6 +4,8 @@ on:
     secrets:
       FIREBASE_ADMIN_SDK:
         required: true
+      SHOREBIRD_TOKEN:
+        required: false
 jobs:
   distribute:
     runs-on: ubuntu-latest
