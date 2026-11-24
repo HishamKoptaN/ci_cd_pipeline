@@ -18,18 +18,26 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'push' && github.ref_name || github.base_ref }}
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT || secrets.FIREBASE_SERVICE_ACCOUNT_GREEN_SOUQ_31C75 }}
+      PROJECT_ID: ${{ vars.PROJECT_ID }}
     steps:
+      - name: Skip notice — missing secrets or vars
+        if: env.FIREBASE_SERVICE_ACCOUNT == '' || env.PROJECT_ID == ''
+        run: echo "::notice title=Skipped Firebase Hosting deploy::A required secret or variable is empty; protected steps were skipped"
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           flutter-version-file: pubspec.yaml
           channel: "stable"
           cache: true
-      - run: flutter build web --release --dart-define=ENV=${{ github.event_name == 'push' && github.ref_name || github.base_ref }}
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - if: env.FIREBASE_SERVICE_ACCOUNT != '' && env.PROJECT_ID != ''
+        run: flutter build web --release --dart-define=ENV=${{ github.event_name == 'push' && github.ref_name || github.base_ref }}
+      - if: env.FIREBASE_SERVICE_ACCOUNT != '' && env.PROJECT_ID != ''
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT || secrets.FIREBASE_SERVICE_ACCOUNT_GREEN_SOUQ_31C75 }}
-          projectId: ${{ vars.PROJECT_ID }}
+          firebaseServiceAccount: ${{ env.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ env.PROJECT_ID }}
           target: ${{ vars.TARGET }}
           channelId: ${{ github.event_name == 'push' && 'live' || '' }}
