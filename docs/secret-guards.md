@@ -58,6 +58,17 @@ Composite actions apply the same rule internally:
 
 The same guard pattern was applied to the standalone workflows in `muein_dash` (Firebase Hosting), `muein_orders` (signing/profiles) and `odhia_dash` (SFTP/SSH deploy).
 
+## Branch status
+
+The guard work is on these pushed branches:
+
+- `ci_cd_pipeline`: `fix/skip-empty-secrets`
+- `muein_dash`: `fix/skip-empty-secrets-consumers`, followed by `fix/workflow-permissions`, `ci/actionlint-check` and `ci/actionlint-push-dev`
+- `muein_orders`: `fix/skip-empty-secrets-consumers`
+- `odhia_dash`: `fix/skip-empty-secrets-consumers`
+
+Every branch is below 400 changed lines and passes `actionlint` with `shellcheck`.
+
 ## Adding a new guarded step
 
 1. Map the secret/variable to job-level `env`.
