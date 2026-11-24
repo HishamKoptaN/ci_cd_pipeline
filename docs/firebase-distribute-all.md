@@ -9,4 +9,25 @@
 
 Call it through `00-main.yml` or as a reusable workflow. It requires the same inputs/secrets as the individual flows (e.g. `SHOREBIRD_TOKEN`, `FIREBASE_ADMIN_SDK`, `FIREBASE_SERVICE_ACCOUNT`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`).
 
+## Flavor variables
+
+The reusable workflows accept an optional `flavor` input and resolve it in this order:
+
+1. Explicit `flavor` passed by the caller.
+2. Environment variable `vars.PER_FLAVOR`.
+3. `github.ref_name` as the fallback.
+
+Use this when different projects want different flavors. Example vars:
+
+```yaml
+# green_souq
+PROJECT_ID: greensoouq-dev
+PER_FLAVOR: dev
+
+# muein_orders
+PER_FLAVOR: prod
+```
+
+See [Permissions matrix](permissions.md) for the required permissions.
+
 The workflow grants `contents: write`, `checks: write` and `pull-requests: write`; callers must grant at least these. See [Permissions matrix](permissions.md).
