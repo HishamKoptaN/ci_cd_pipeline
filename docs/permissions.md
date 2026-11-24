@@ -56,6 +56,7 @@ jobs:
 - Standalone Firebase Hosting workflows: both PR and deployment files declare the three scopes explicitly.
 - Standalone SFTP/SSH deployment workflows: no GitHub API scopes are required beyond the default checkout permission; all authentication comes from secrets.
 - Signing/profile workflows: use App Store Connect credentials, not GitHub API permissions.
+- `muein_dash`: the required `actionlint` check now runs on every PR and on pushes to `dev`; it only needs `contents: read`.
 
 ## Verification
 
