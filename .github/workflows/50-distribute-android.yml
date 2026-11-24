@@ -13,20 +13,27 @@ jobs:
     environment: ${{ github.ref_name }}
     env:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      FIREBASE_ADMIN_SDK: ${{ secrets.FIREBASE_ADMIN_SDK }}
     steps:
+      - name: Skip notice — missing secrets
+        if: env.SHOREBIRD_TOKEN == '' || env.FIREBASE_ADMIN_SDK == ''
+        run: echo "::notice title=Skipped Android distribution::A required secret is empty; protected steps were skipped"
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
+      - if: env.SHOREBIRD_TOKEN != ''
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
         with:
-          shorebird_token: ${{ secrets.SHOREBIRD_TOKEN }}
+          shorebird_token: ${{ env.SHOREBIRD_TOKEN }}
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
       - id: get-build-version
+        if: env.SHOREBIRD_TOKEN != ''
         uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/get-build-version@prod
         with:
           platform: "android"
-          shorebird_token: ${{ secrets.SHOREBIRD_TOKEN }}
-      - run: |
+          shorebird_token: ${{ env.SHOREBIRD_TOKEN }}
+      - if: env.SHOREBIRD_TOKEN != ''
+        run: |
             shorebird release android \
             --target=lib/main.dart \
             --artifact=apk \
@@ -39,6 +46,7 @@ jobs:
             -- \
             --no-tree-shake-icons
       - id: get_app_id
+        if: env.SHOREBIRD_TOKEN != ''
         run: |
           DART_FILE="lib/config/firebase/${{ github.ref_name }}/firebase_options.dart"
           if [ -f "$DART_FILE" ]; then
@@ -51,7 +59,8 @@ jobs:
           fi
           echo "❌ Could not find Firebase App ID for ${{ github.ref_name }}"
           exit 1
-      - uses: wzieba/Firebase-Distribution-Github-Action@v1
+      - if: env.FIREBASE_ADMIN_SDK != ''
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ steps.get_app_id.outputs.app_id }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_ADMIN_SDK }}
