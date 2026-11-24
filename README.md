@@ -132,7 +132,7 @@ Distribution Layer
 
 **Files**: `build-deploy-web.yml`
 
-See the [Firebase Hosting reusable workflow](docs/firebase-hosting.md) to call the web deploy flow from other projects.
+See the [Firebase Hosting reusable workflow](docs/firebase-hosting.md) to call the web deploy flow from other projects, and [Credential skip guards](docs/secret-guards.md) for how empty secrets/vars disable individual steps.
 
 ---
 
