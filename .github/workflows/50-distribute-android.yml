@@ -1,6 +1,10 @@
 name: Distribute Android
 on:
   workflow_call:
+    inputs:
+      flavor:
+        required: false
+        type: string
     secrets:
       FIREBASE_ADMIN_SDK:
         required: true
@@ -10,14 +14,13 @@ jobs:
   distribute:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: ${{ github.ref_name }}
+    environment: ${{ inputs.flavor || github.ref_name }}
     env:
+      FLAVOR: ${{ inputs.flavor || github.ref_name }}
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
       FIREBASE_ADMIN_SDK: ${{ secrets.FIREBASE_ADMIN_SDK }}
     steps:
-      - name: Skip notice — missing secrets
-        if: env.SHOREBIRD_TOKEN == '' || env.FIREBASE_ADMIN_SDK == ''
-        run: echo "::notice title=Skipped Android distribution::A required secret is empty; protected steps were skipped"
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -38,8 +41,8 @@ jobs:
             --target=lib/main.dart \
             --artifact=apk \
             --flutter-version=3.50.0 \
-            --flavor=${{ github.ref_name }} \
-            --dart-define=ENV=${{ github.ref_name }} \
+            --flavor=${{ env.FLAVOR }} \
+            --dart-define=ENV=${{ env.FLAVOR }} \
             --build-name=${{ steps.get-build-version.outputs.build_name }} \
             --build-number=${{ steps.get-build-version.outputs.build_number }} \
             --target-platform=android-arm64 \
@@ -48,7 +51,7 @@ jobs:
       - id: get_app_id
         if: env.SHOREBIRD_TOKEN != ''
         run: |
-          DART_FILE="lib/config/firebase/${{ github.ref_name }}/firebase_options.dart"
+          DART_FILE="lib/config/firebase/${{ env.FLAVOR }}/firebase_options.dart"
           if [ -f "$DART_FILE" ]; then
             APP_ID=$(sed -n '/static const FirebaseOptions android/,/);/p' "$DART_FILE" | grep "appId:" | sed "s/.*'\([^']*\)'.*/\1/")
             if [ -n "$APP_ID" ]; then
@@ -57,7 +60,7 @@ jobs:
               exit 0
             fi
           fi
-          echo "❌ Could not find Firebase App ID for ${{ github.ref_name }}"
+          echo "❌ Could not find Firebase App ID for ${{ env.FLAVOR }}"
           exit 1
       - if: env.FIREBASE_ADMIN_SDK != ''
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -65,4 +68,4 @@ jobs:
           appId: ${{ steps.get_app_id.outputs.app_id }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_ADMIN_SDK }}
           groups: "apk"
-          file: build/app/outputs/flutter-apk/app-${{ github.ref_name }}-release.apk
+          file: build/app/outputs/flutter-apk/app-${{ env.FLAVOR }}-release.apk

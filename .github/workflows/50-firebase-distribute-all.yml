@@ -1,0 +1,38 @@
+name: Firebase Distribute All Platforms
+
+on:
+  workflow_call:
+    inputs:
+      flavor:
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  android_apk:
+    uses: ./.github/workflows/50-distribute-android.yml
+    with:
+      flavor: ${{ inputs.flavor || vars.PER_FLAVOR || github.ref_name }}
+    secrets: inherit
+
+  android_aab:
+    uses: ./.github/workflows/20-deploy-google-play.yml
+    with:
+      flavor: ${{ inputs.flavor || vars.PER_FLAVOR || github.ref_name }}
+    secrets: inherit
+
+  ios_release:
+    uses: ./.github/workflows/30-ios-release.yml
+    with:
+      flavor: ${{ inputs.flavor || vars.PER_FLAVOR || github.ref_name }}
+    secrets: inherit
+
+  web_hosting:
+    uses: ./.github/workflows/50-firebase-hosting.yml
+    with:
+      flavor: ${{ inputs.flavor || vars.PER_FLAVOR || github.ref_name }}
+    secrets: inherit

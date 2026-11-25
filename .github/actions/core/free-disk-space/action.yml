@@ -1,0 +1,80 @@
+name: Free Disk Space
+description: Reclaim runner disk space before heavy Android builds.
+
+inputs:
+  remove_dotnet:
+    description: Remove .NET runtime.
+    required: false
+    default: 'true'
+  remove_haskell:
+    description: Remove Haskell runtime and GHCup.
+    required: false
+    default: 'true'
+  remove_boost:
+    description: Remove Boost headers.
+    required: false
+    default: 'true'
+  remove_android_ndk:
+    description: Remove preinstalled Android NDK. Keep false unless the build does not need NDK.
+    required: false
+    default: 'false'
+  remove_docker_images:
+    description: Prune Docker images.
+    required: false
+    default: 'true'
+  remove_tool_cache:
+    description: Remove hosted tool cache. Use only when later steps do not depend on it.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Disk usage before cleanup
+      shell: bash
+      run: |
+        echo "== Disk before cleanup =="
+        df -h /
+        du -sh /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" /usr/local/lib/android/sdk/ndk 2>/dev/null || true
+
+    - name: Reclaim disk space
+      shell: bash
+      env:
+        REMOVE_DOTNET: ${{ inputs.remove_dotnet }}
+        REMOVE_HASKELL: ${{ inputs.remove_haskell }}
+        REMOVE_BOOST: ${{ inputs.remove_boost }}
+        REMOVE_ANDROID_NDK: ${{ inputs.remove_android_ndk }}
+        REMOVE_DOCKER_IMAGES: ${{ inputs.remove_docker_images }}
+        REMOVE_TOOL_CACHE: ${{ inputs.remove_tool_cache }}
+      run: |
+        set -euxo pipefail
+
+        if [[ "$REMOVE_DOTNET" == 'true' ]]; then
+          sudo rm -rf /usr/share/dotnet || true
+        fi
+
+        if [[ "$REMOVE_HASKELL" == 'true' ]]; then
+          sudo rm -rf /opt/ghc /usr/local/.ghcup || true
+        fi
+
+        if [[ "$REMOVE_BOOST" == 'true' ]]; then
+          sudo rm -rf /usr/local/share/boost || true
+        fi
+
+        if [[ "$REMOVE_ANDROID_NDK" == 'true' ]]; then
+          sudo rm -rf /usr/local/lib/android/sdk/ndk || true
+        fi
+
+        if [[ "$REMOVE_DOCKER_IMAGES" == 'true' ]]; then
+          sudo docker image prune --all --force || true
+        fi
+
+        if [[ "$REMOVE_TOOL_CACHE" == 'true' ]]; then
+          sudo rm -rf "${AGENT_TOOLSDIRECTORY:-/opt/hostedtoolcache}" || true
+        fi
+
+    - name: Disk usage after cleanup
+      shell: bash
+      run: |
+        echo "== Disk after cleanup =="
+        df -h /

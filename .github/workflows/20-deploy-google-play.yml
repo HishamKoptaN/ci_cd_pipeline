@@ -1,19 +1,21 @@
 name: 20-deploy-google-play.yml
 on:
   workflow_call:
+    inputs:
+      flavor:
+        required: false
+        type: string
 jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    environment: ${{ github.ref_name }}
+    environment: ${{ inputs.flavor || github.ref_name }}
     env:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
       GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
       TRACK: ${{ vars.TRACK }}
     steps:
-      - name: Skip notice — missing secrets or vars
-        if: env.SHOREBIRD_TOKEN == '' || env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON == '' || env.TRACK == ''
-        run: echo "::notice title=Skipped Google Play release::A required secret or variable is empty; protected steps were skipped"
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -23,5 +25,16 @@ jobs:
       - if: env.SHOREBIRD_TOKEN != '' && env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != '' && env.TRACK != ''
         uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-aab-release@prod
         with:
-          google_play_service_account_json: ${{ env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          track: ${{ env.TRACK }}
+          google_play_service_account_json: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          track: ${{ vars.TRACK }}
+      - name: Disk usage after release
+        if: always()
+        run: |
+          echo "== Disk after release =="
+          df -h /
+          du -sh build .dart_tool ~/.gradle /usr/local/lib/android/sdk 2>/dev/null || true
+      - name: Clean Gradle caches
+        if: always()
+        run: |
+          rm -rf ~/.gradle/caches ~/.gradle/wrapper/dists build android/.gradle .dart_tool/build || true
+          df -h /

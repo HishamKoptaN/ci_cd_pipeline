@@ -6,12 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment: ${{ github.ref_name }}
+    concurrency:
+      group: android-release-${{ github.repository }}-${{ github.ref_name }}
+      cancel-in-progress: false
     env:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
-      - name: Skip notice — missing secrets
-        if: env.SHOREBIRD_TOKEN == ''
-        run: echo "::notice title=Skipped Android release::SHOREBIRD_TOKEN is empty; protected steps were skipped"
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
@@ -45,4 +46,15 @@ jobs:
           name: android-apk-${{ github.ref_name }}
           path: build/app/outputs/**/*.apk
           retention-days: 1
+      - name: Disk usage after release
+        if: always()
+        run: |
+          echo "== Disk after release =="
+          df -h /
+          du -sh build .dart_tool ~/.gradle /usr/local/lib/android/sdk 2>/dev/null || true
+      - name: Clean Gradle caches
+        if: always()
+        run: |
+          rm -rf ~/.gradle/caches ~/.gradle/wrapper/dists build android/.gradle .dart_tool/build || true
+          df -h /
 
