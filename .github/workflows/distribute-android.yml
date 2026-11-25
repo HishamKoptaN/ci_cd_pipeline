@@ -13,7 +13,13 @@ jobs:
   distribute:
     runs-on: ubuntu-latest
     environment: ${{ inputs.flavor }}
+    env:
+      FIREBASE_ADMIN_SDK: ${{ secrets.FIREBASE_ADMIN_SDK }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Skip notice — missing secrets
+        if: env.FIREBASE_ADMIN_SDK == ''
+        run: echo "::notice title=Skipped Firebase distribution::FIREBASE_ADMIN_SDK is empty; protected steps were skipped"
       - uses: actions/checkout@v7
         with:
           fetch-depth: 1
@@ -67,7 +73,7 @@ jobs:
           echo "Found Firebase App ID: $APP_ID"
           echo "app_id=$APP_ID" >> "$GITHUB_OUTPUT"
 
-      - if: steps.find_apk.outputs.found == 'true'
+      - if: steps.find_apk.outputs.found == 'true' && env.FIREBASE_ADMIN_SDK != ''
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ steps.get_app_id.outputs.app_id }}
@@ -84,7 +90,7 @@ jobs:
             echo "tag=latest_${{ inputs.flavor }}" >> "$GITHUB_OUTPUT"
           fi
 
-      - if: steps.find_apk.outputs.found == 'true'
+      - if: steps.find_apk.outputs.found == 'true' && env.GITHUB_TOKEN != ''
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.release_tag.outputs.tag }}
@@ -92,4 +98,4 @@ jobs:
           files: build/app/outputs/flutter-apk/*.apk
           prerelease: ${{ inputs.flavor == 'dev' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}

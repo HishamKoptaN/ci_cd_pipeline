@@ -175,7 +175,7 @@ The project includes optimized **file nesting patterns** for clean workflow orga
 
 ## 🚀 Usage
 
-Reusable workflows: [Firebase Hosting](docs/firebase-hosting.md), [Auto PR](docs/auto-pr.md).
+Reusable workflows: [Firebase Hosting](docs/firebase-hosting.md), [Auto PR](docs/auto-pr.md), [Firebase Distribute All Platforms](docs/firebase-distribute-all.md).
 
 ### 1. Fork/Clone
 ```bash

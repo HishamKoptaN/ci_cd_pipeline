@@ -23,7 +23,12 @@ runs:
             --build-name=${{ steps.get-build-version.outputs.build_name }} \
             --build-number=${{ steps.get-build-version.outputs.build_number }} \
             --target-platform=android-arm,android-arm64
-      - uses: softprops/action-gh-release@v2
+      - name: Skip notice — missing credentials
+        if: inputs.github_token == ''
+        shell: bash
+        run: echo "::notice title=Skipped GitHub release::github_token is empty; protected steps were skipped"
+      - if: inputs.github_token != ''
+        uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/flutter-apk/app-${{ github.ref_name }}-release.apk
           tag_name: latest

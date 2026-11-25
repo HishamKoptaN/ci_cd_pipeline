@@ -21,7 +21,10 @@ runs:
       - shell: bash
         run: |
           gem install fastlane
-      - shell: bash
+      - if: >-
+          inputs.appstore_issuer_id != '' && inputs.appstore_api_key_id != '' &&
+          inputs.appstore_api_private_key != ''
+        shell: bash
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ inputs.appstore_api_key_id }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ inputs.appstore_issuer_id }}
@@ -32,6 +35,9 @@ runs:
           cd ios
           fastlane get_certs
       - id: profiles
+        if: >-
+          inputs.appstore_issuer_id != '' && inputs.appstore_api_key_id != '' &&
+          inputs.appstore_api_private_key != ''
         uses: apple-actions/download-provisioning-profiles@v7
         with:
           bundle-id: 'com.muein.orders'
@@ -39,7 +45,10 @@ runs:
           issuer-id: ${{ inputs.appstore_issuer_id }}
           api-key-id: ${{ inputs.appstore_api_key_id }}
           api-private-key: ${{ inputs.appstore_api_private_key }}
-      - shell: bash
+      - if: >-
+          inputs.appstore_issuer_id != '' && inputs.appstore_api_key_id != '' &&
+          inputs.appstore_api_private_key != ''
+        shell: bash
         env:
           PROFILES: ${{ steps.profiles.outputs.profiles }}
         run: |
