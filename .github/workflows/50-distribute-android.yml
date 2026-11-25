@@ -1,6 +1,10 @@
 name: Distribute Android
 on:
   workflow_call:
+    inputs:
+      flavor:
+        required: false
+        type: string
     secrets:
       FIREBASE_ADMIN_SDK:
         required: true
@@ -10,11 +14,9 @@ jobs:
   distribute:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: ${{ github.ref_name }}
-    concurrency:
-      group: distribute-android-${{ github.repository }}-${{ github.ref_name }}
-      cancel-in-progress: false
+    environment: ${{ inputs.flavor || github.ref_name }}
     env:
+      FLAVOR: ${{ inputs.flavor || github.ref_name }}
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
@@ -35,8 +37,8 @@ jobs:
             --target=lib/main.dart \
             --artifact=apk \
             --flutter-version=3.50.0 \
-            --flavor=${{ github.ref_name }} \
-            --dart-define=ENV=${{ github.ref_name }} \
+            --flavor=${{ env.FLAVOR }} \
+            --dart-define=ENV=${{ env.FLAVOR }} \
             --build-name=${{ steps.get-build-version.outputs.build_name }} \
             --build-number=${{ steps.get-build-version.outputs.build_number }} \
             --target-platform=android-arm64 \
@@ -44,7 +46,7 @@ jobs:
             --no-tree-shake-icons
       - id: get_app_id
         run: |
-          DART_FILE="lib/config/firebase/${{ github.ref_name }}/firebase_options.dart"
+          DART_FILE="lib/config/firebase/${{ env.FLAVOR }}/firebase_options.dart"
           if [ -f "$DART_FILE" ]; then
             APP_ID=$(sed -n '/static const FirebaseOptions android/,/);/p' "$DART_FILE" | grep "appId:" | sed "s/.*'\([^']*\)'.*/\1/")
             if [ -n "$APP_ID" ]; then
@@ -53,22 +55,11 @@ jobs:
               exit 0
             fi
           fi
-          echo "❌ Could not find Firebase App ID for ${{ github.ref_name }}"
+          echo "❌ Could not find Firebase App ID for ${{ env.FLAVOR }}"
           exit 1
       - uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ steps.get_app_id.outputs.app_id }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_ADMIN_SDK }}
           groups: "apk"
-          file: build/app/outputs/flutter-apk/app-${{ github.ref_name }}-release.apk
-      - name: Disk usage after distribute
-        if: always()
-        run: |
-          echo "== Disk after distribute =="
-          df -h /
-          du -sh build .dart_tool ~/.gradle /usr/local/lib/android/sdk 2>/dev/null || true
-      - name: Clean Gradle caches
-        if: always()
-        run: |
-          rm -rf ~/.gradle/caches ~/.gradle/wrapper/dists build android/.gradle .dart_tool/build || true
-          df -h /
+          file: build/app/outputs/flutter-apk/app-${{ env.FLAVOR }}-release.apk
