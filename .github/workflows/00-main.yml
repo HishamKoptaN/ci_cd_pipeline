@@ -9,7 +9,7 @@ permissions:
 on:
   workflow_call:
   push:
-    branches: [dev, prods]
+    branches: [dev, prod]
   workflow_dispatch:
 jobs: 
   auto_pr:
