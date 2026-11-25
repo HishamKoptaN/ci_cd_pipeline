@@ -25,7 +25,12 @@ jobs:
     environment: ${{ inputs.flavor }}
     outputs:
       changed: ${{ steps.deploy.outputs.changed }}
+    env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
+      - name: Skip notice — missing secrets
+        if: env.SHOREBIRD_TOKEN == ''
+        run: echo "::notice title=Skipped Shorebird deployment::SHOREBIRD_TOKEN is empty; protected steps were skipped"
       - uses: actions/checkout@v7
         with:
           fetch-depth: 1
@@ -46,9 +51,8 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - id: deploy
+        if: env.SHOREBIRD_TOKEN != ''
         shell: bash
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
           version="${{ inputs.full_version }}"
           baseVersion="${{ inputs.base_version }}"
@@ -81,19 +85,17 @@ jobs:
             fi
           fi
           echo "changed=$versionChanged" >> "$GITHUB_OUTPUT"
-      - if: inputs.flavor == 'prod' && hashFiles('build/app/outputs/bundle/*/*.aab') != ''
+      - if: env.SHOREBIRD_TOKEN != '' && inputs.flavor == 'prod' && hashFiles('build/app/outputs/bundle/*/*.aab') != ''
         uses: actions/upload-artifact@v7
         with:
           name: android-aab-${{ inputs.flavor }}
           path: build/app/outputs/bundle/*/*.aab
           retention-days: 1
-      - if: steps.deploy.outputs.changed == 'true' || inputs.flavor == 'dev'
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      - if: env.SHOREBIRD_TOKEN != '' && (steps.deploy.outputs.changed == 'true' || inputs.flavor == 'dev')
         run: |
           shorebird release android --flavor=${{ inputs.flavor }} --artifact=apk --dart-define=ENV=${{ inputs.flavor }} '--' --no-tree-shake-icons || true
           ls -la build/app/outputs/flutter-apk/
-      - if: steps.deploy.outputs.changed == 'true' || inputs.flavor == 'dev'
+      - if: env.SHOREBIRD_TOKEN != '' && (steps.deploy.outputs.changed == 'true' || inputs.flavor == 'dev')
         uses: actions/upload-artifact@v7
         with:
           name: android-apk-${{ inputs.flavor }}

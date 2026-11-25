@@ -7,12 +7,20 @@ jobs:
     timeout-minutes: 60
     environment: ${{ github.ref_name }}
     env:
+      SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      DISTRIBUTION_PRIVATE_KEY_BASE64: ${{ secrets.DISTRIBUTION_PRIVATE_KEY_BASE64 }}
       APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
       APP_STORE_CONNECT_API_KEY_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
       APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
     outputs:
       build_type: ${{ steps.dry_run.outputs.build_type }}
     steps:
+      - name: Skip notice — missing secrets or vars
+        if: >-
+          env.SHOREBIRD_TOKEN == '' || env.DISTRIBUTION_PRIVATE_KEY_BASE64 == '' ||
+          env.APP_STORE_CONNECT_ISSUER_ID == '' || env.APP_STORE_CONNECT_API_KEY_ID == '' ||
+          env.APP_STORE_CONNECT_API_PRIVATE_KEY == ''
+        run: echo "::notice title=Skipped iOS shorebird check::A required secret or variable is empty; protected steps were skipped"
       - uses: actions/checkout@v7
       - uses: actions/cache@v6
         with:
@@ -21,6 +29,10 @@ jobs:
             ios/Pods
           key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock') }}
       - id: dry_run
+        if: >-
+          env.SHOREBIRD_TOKEN != '' && env.DISTRIBUTION_PRIVATE_KEY_BASE64 != '' &&
+          env.APP_STORE_CONNECT_ISSUER_ID != '' && env.APP_STORE_CONNECT_API_KEY_ID != '' &&
+          env.APP_STORE_CONNECT_API_PRIVATE_KEY != ''
         uses: HishamKoptaN/ci_cd_pipeline/.github/actions/ios/shorebird-ios-dry-patch@prod
         with:
           flavor: ${{ github.ref_name }}

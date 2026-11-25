@@ -11,9 +11,15 @@ permissions:
 jobs:
   pull-request:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      - name: Skip notice — missing secrets
+        if: env.GITHUB_TOKEN == ''
+        run: echo "::notice title=Skipped Auto PR::GITHUB_TOKEN is empty; protected steps were skipped"
       - uses: actions/checkout@v7
-      - uses: diillson/auto-pull-request@v1.0.1
+      - if: env.GITHUB_TOKEN != ''
+        uses: diillson/auto-pull-request@v1.0.1
         with:
           source_branch: ""
           destination_branch: "dev"

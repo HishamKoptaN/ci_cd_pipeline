@@ -22,6 +22,9 @@ jobs:
     env:
       FLAVOR: ${{ inputs.flavor || (github.event_name == 'push' && github.ref_name || github.base_ref) }}
     steps:
+      - name: Skip notice — missing secrets or vars
+        if: env.FIREBASE_SERVICE_ACCOUNT == '' || env.PROJECT_ID == ''
+        run: echo "::notice title=Skipped Firebase Hosting deploy::A required secret or variable is empty; protected steps were skipped"
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
@@ -32,7 +35,7 @@ jobs:
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT || secrets.FIREBASE_SERVICE_ACCOUNT_GREEN_SOUQ_31C75 }}
-          projectId: ${{ vars.PROJECT_ID }}
+          firebaseServiceAccount: ${{ env.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ env.PROJECT_ID }}
           target: ${{ vars.TARGET }}
           channelId: ${{ github.event_name == 'push' && 'live' || '' }}

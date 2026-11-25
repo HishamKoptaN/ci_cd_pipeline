@@ -12,14 +12,18 @@ jobs:
     environment: ${{ inputs.flavor || github.ref_name }}
     env:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+      TRACK: ${{ vars.TRACK }}
     steps:
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
+      - if: env.SHOREBIRD_TOKEN != ''
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-aab-release@prod
+      - if: env.SHOREBIRD_TOKEN != '' && env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != '' && env.TRACK != ''
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-aab-release@prod
         with:
           google_play_service_account_json: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           track: ${{ vars.TRACK }}

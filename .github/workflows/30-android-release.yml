@@ -16,13 +16,15 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
+      - if: env.SHOREBIRD_TOKEN != ''
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
       - id: get-build-version
         uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/get-build-version@prod
         with:
           platform: "android"
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
       - id: run
+        if: env.SHOREBIRD_TOKEN != ''
         run: |
           flavor="${{ github.ref_name }}"
           shorebird release android \
