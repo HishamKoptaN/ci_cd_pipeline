@@ -30,4 +30,9 @@ PER_FLAVOR: prod
 
 See [Permissions matrix](permissions.md) for the required permissions.
 
+## Consumers using PER_FLAVOR
+
+- `green_file_flutter`: `deploy.yml` sets `env.PER_FLAVOR` from `vars.PER_FLAVOR || github.ref_name` and uses it in `flutter build web`.
+- `muein_dash`: the merge/PR hosting workflows set `env.PER_FLAVOR` from `vars.PER_FLAVOR` (merge uses `github.ref_name`, PR uses `github.base_ref`) and use it in `flutter build web`.
+
 The workflow grants `contents: write`, `checks: write` and `pull-requests: write`; callers must grant at least these. See [Permissions matrix](permissions.md).
