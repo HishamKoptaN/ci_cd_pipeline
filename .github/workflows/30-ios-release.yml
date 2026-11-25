@@ -1,12 +1,17 @@
 name: 30-shorebird-ios-release.yml
 on:
   workflow_call:
+    inputs:
+      flavor:
+        required: false
+        type: string
 jobs:
   ios:
     runs-on: macos-latest
     timeout-minutes: 60
-    environment: ${{ github.ref_name }}
+    environment: ${{ inputs.flavor || github.ref_name }}
     env:
+      FLAVOR: ${{ inputs.flavor || github.ref_name }}
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
     steps:
       - uses: actions/checkout@v7
@@ -50,8 +55,8 @@ jobs:
       - run: |
               shorebird release ios \
               --flutter-version=3.50.0 \
-              --flavor=${{ github.ref_name }} \
-              --dart-define=ENV=${{ github.ref_name }} \
+              --flavor=${{ env.FLAVOR }} \
+              --dart-define=ENV=${{ env.FLAVOR }} \
               --target=lib/main.dart \
               --export-options-plist=ios/ExportOptions.plist
       - id: find_ipa
