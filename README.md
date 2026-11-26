@@ -132,7 +132,7 @@ Distribution Layer
 
 **Files**: `build-deploy-web.yml`
 
-See the [Firebase Hosting reusable workflow](docs/firebase-hosting.md) to call the web deploy flow from other projects, and [Credential skip guards](docs/secret-guards.md) for how empty secrets/vars disable individual steps.
+See the [Firebase Hosting reusable workflow](docs/firebase-hosting.md) to call the web deploy flow from other projects, and [Credential skip guards](docs/secret-guards.md) for how empty secrets/vars disable individual steps. Also see the [Permissions matrix](docs/permissions.md) for caller scope requirements.
 
 ---
 
