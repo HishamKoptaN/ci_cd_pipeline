@@ -4,7 +4,7 @@ description: 'Caches Flutter, Dart, Gradle, and Android Native build artifacts f
 runs:
   using: "composite"
   steps:
-    - uses: actions/cache@v4
+    - uses: actions/cache@v6
       with:
         path: |
           build/
@@ -13,7 +13,7 @@ runs:
         key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ hashFiles('lib/**/*.dart') }}
         restore-keys: |
           flutter-build-${{ runner.os }}-
-    - uses: actions/cache@v4
+    - uses: actions/cache@v6
       with:
         path: |
           ~/.gradle/caches
