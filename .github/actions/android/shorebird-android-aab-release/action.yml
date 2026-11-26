@@ -6,6 +6,9 @@ inputs:
   track:
     type: string
     required: true
+  shorebird_token:
+    required: false
+    description: "Shorebird API token for calculating build version"
 runs:
   using: "composite"
   steps:
@@ -13,6 +16,7 @@ runs:
         uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/get-build-version@prod
         with:
           platform: "android"
+          shorebird_token: ${{ inputs.shorebird_token }}
       - shell: bash
         env:
           GRADLE_OPTS: "-Dorg.gradle.daemon=true -Dorg.gradle.caching=true -Dorg.gradle.vfs.watch=true"

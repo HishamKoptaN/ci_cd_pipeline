@@ -11,6 +11,8 @@ jobs:
       cancel-in-progress: false
     env:
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+      TRACK: ${{ vars.TRACK }}
     steps:
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
       - uses: actions/checkout@v7
@@ -18,10 +20,16 @@ jobs:
           fetch-depth: 0
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/setup-android-shorebird@prod
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/cache-flutter-android@prod
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-aab-release@prod
+      - name: Skip notice — missing credentials
+        if: env.SHOREBIRD_TOKEN == '' || env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON == '' || env.TRACK == ''
+        shell: bash
+        run: echo "::notice title=Skipped Google Play upload::Service account JSON, track, or Shorebird token is empty; protected steps were skipped"
+      - if: env.SHOREBIRD_TOKEN != '' && env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON != '' && env.TRACK != ''
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/android/shorebird-android-aab-release@prod
         with:
           google_play_service_account_json: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           track: ${{ vars.TRACK }}
+          shorebird_token: ${{ env.SHOREBIRD_TOKEN }}
       - name: Disk usage after release
         if: always()
         run: |
