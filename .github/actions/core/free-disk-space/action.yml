@@ -26,16 +26,34 @@ inputs:
     description: Remove hosted tool cache. Use only when later steps do not depend on it.
     required: false
     default: 'false'
+  min_free_gb:
+    description: Fail after cleanup if free disk space on / is below this threshold in GB. Set 0 to disable.
+    required: false
+    default: '10'
 
 runs:
   using: composite
   steps:
     - name: Disk usage before cleanup
+      id: before
       shell: bash
       run: |
+        set -euo pipefail
+        avail_kb=$(df -Pk / | awk 'NR==2 {print $4}')
+        avail_gb=$(awk "BEGIN {printf \"%.2f\", ${avail_kb}/1024/1024}")
+        echo "avail_gb=${avail_gb}" >> "$GITHUB_OUTPUT"
         echo "== Disk before cleanup =="
         df -h /
         du -sh /usr/share/dotnet /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" /usr/local/lib/android/sdk/ndk 2>/dev/null || true
+        if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+          {
+            echo "### Free Disk Space"
+            echo ""
+            echo "| Stage | Free on / |"
+            echo "| --- | ---: |"
+            echo "| Before cleanup | ${avail_gb} GB |"
+          } >> "$GITHUB_STEP_SUMMARY"
+        fi
 
     - name: Reclaim disk space
       shell: bash
@@ -74,7 +92,28 @@ runs:
         fi
 
     - name: Disk usage after cleanup
+      id: after
       shell: bash
+      env:
+        MIN_FREE_GB: ${{ inputs.min_free_gb }}
+        BEFORE_GB: ${{ steps.before.outputs.avail_gb }}
       run: |
+        set -euo pipefail
+        avail_kb=$(df -Pk / | awk 'NR==2 {print $4}')
+        avail_gb=$(awk "BEGIN {printf \"%.2f\", ${avail_kb}/1024/1024}")
+        echo "avail_gb=${avail_gb}" >> "$GITHUB_OUTPUT"
         echo "== Disk after cleanup =="
         df -h /
+        if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+          {
+            echo "| After cleanup | ${avail_gb} GB |"
+            echo ""
+            echo "- Before: ${BEFORE_GB} GB"
+            echo "- After: ${avail_gb} GB"
+            echo "- Minimum required: ${MIN_FREE_GB} GB"
+          } >> "$GITHUB_STEP_SUMMARY"
+        fi
+        if awk "BEGIN {exit !(${avail_gb} < ${MIN_FREE_GB})}"; then
+          echo "::error::Free disk space ${avail_gb} GB is below required ${MIN_FREE_GB} GB after cleanup."
+          exit 1
+        fi
