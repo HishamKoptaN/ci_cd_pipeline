@@ -177,6 +177,14 @@ The project includes optimized **file nesting patterns** for clean workflow orga
 
 Reusable workflows: [Firebase Hosting](docs/firebase-hosting.md), [Auto PR](docs/auto-pr.md), [Firebase Distribute All Platforms](docs/firebase-distribute-all.md).
 
+### Shorebird build version (`get-build-version`)
+
+The `get-build-version` action calculates the next Android/iOS build number by calling `shorebird releases list`. When `SHOREBIRD_TOKEN` is empty or not provided:
+
+- `shorebird releases list` cannot authenticate, so the action falls back to safe defaults (`build_name: 1.0.0`, `build_number: 1`) instead of failing.
+- `set-shorebird-app-id` is skipped because there is no authenticated Shorebird session to validate against.
+- Downstream Shorebird release steps are also guarded and skipped when the token is empty.
+
 ### 1. Fork/Clone
 ```bash
 git clone https://github.com/YOUR_USERNAME/flutter_devops_core.git
