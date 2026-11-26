@@ -1,18 +1,35 @@
 name: 30-shorebird-ios-release.yml
 on:
   workflow_call:
+    inputs:
+      flavor:
+        required: false
+        type: string
 jobs:
   ios:
     runs-on: macos-latest
     timeout-minutes: 60
-    environment: ${{ github.ref_name }}
+    environment: ${{ inputs.flavor || github.ref_name }}
     env:
+      FLAVOR: ${{ inputs.flavor || github.ref_name }}
       SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+      APP_STORE_CONNECT_API_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_PRIVATE_KEY }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_ID: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
     steps:
+      - name: Skip notice — missing secrets or vars
+        if: >-
+          env.SHOREBIRD_TOKEN == '' || env.APP_STORE_CONNECT_API_PRIVATE_KEY == '' ||
+          env.APP_STORE_CONNECT_ISSUER_ID == '' || env.APP_STORE_CONNECT_API_KEY_ID == ''
+        run: echo "::notice title=Skipped iOS release::A required secret or variable is empty; protected steps were skipped"
       - uses: actions/checkout@v7
       - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-flutter@prod
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-shorebird@prod
-      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/ios/setup-ios-signing@prod
+      - if: env.SHOREBIRD_TOKEN != ''
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/setup-shorebird@prod
+      - if: >-
+          env.APP_STORE_CONNECT_API_PRIVATE_KEY != '' && env.APP_STORE_CONNECT_ISSUER_ID != '' &&
+          env.APP_STORE_CONNECT_API_KEY_ID != ''
+        uses: HishamKoptaN/ci_cd_pipeline/.github/actions/ios/setup-ios-signing@prod
         with:
           appstore_issuer_id: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
           appstore_api_key_id: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
@@ -47,11 +64,12 @@ jobs:
           cd ios
           pod install
         shell: bash
-      - run: |
+      - if: env.SHOREBIRD_TOKEN != ''
+        run: |
               shorebird release ios \
               --flutter-version=3.50.0 \
-              --flavor=${{ github.ref_name }} \
-              --dart-define=ENV=${{ github.ref_name }} \
+              --flavor=${{ env.FLAVOR }} \
+              --dart-define=ENV=${{ env.FLAVOR }} \
               --target=lib/main.dart \
               --export-options-plist=ios/ExportOptions.plist
       - id: find_ipa
@@ -62,12 +80,15 @@ jobs:
           IPA_PATH=$(find build/ios/ipa -name "*.ipa" | head -n 1)
           echo "FOUND_IPA=$IPA_PATH" >> "$GITHUB_ENV"
           echo "IPA File: $IPA_PATH"
-      - uses: apple-actions/upload-testflight-build@v5
+      - if: >-
+          env.SHOREBIRD_TOKEN != '' && env.APP_STORE_CONNECT_API_PRIVATE_KEY != '' &&
+          env.APP_STORE_CONNECT_ISSUER_ID != '' && env.APP_STORE_CONNECT_API_KEY_ID != ''
+        uses: apple-actions/upload-testflight-build@v5
         with:
            app-path: ${{ env.FOUND_IPA }}
-           issuer-id: ${{ vars.APP_STORE_CONNECT_ISSUER_ID }}
-           api-key-id: ${{ vars.APP_STORE_CONNECT_API_KEY_ID }}
-           api-private-key: ${{ env.APP_KEY }}
+           issuer-id: ${{ env.APP_STORE_CONNECT_ISSUER_ID }}
+           api-key-id: ${{ env.APP_STORE_CONNECT_API_KEY_ID }}
+           api-private-key: ${{ env.APP_STORE_CONNECT_API_PRIVATE_KEY }}
            backend: altool
            app-type: ios
            

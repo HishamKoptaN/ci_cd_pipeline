@@ -132,7 +132,7 @@ Distribution Layer
 
 **Files**: `build-deploy-web.yml`
 
-See the [Firebase Hosting reusable workflow](docs/firebase-hosting.md) to call the web deploy flow from other projects, and the [Permissions matrix](docs/permissions.md) for caller scope requirements.
+See the [Firebase Hosting reusable workflow](docs/firebase-hosting.md) to call the web deploy flow from other projects, and [Credential skip guards](docs/secret-guards.md) for how empty secrets/vars disable individual steps. Also see the [Permissions matrix](docs/permissions.md) for caller scope requirements.
 
 ---
 
@@ -175,7 +175,7 @@ The project includes optimized **file nesting patterns** for clean workflow orga
 
 ## 🚀 Usage
 
-Reusable workflows: [Firebase Hosting](docs/firebase-hosting.md), [Auto PR](docs/auto-pr.md).
+Reusable workflows: [Firebase Hosting](docs/firebase-hosting.md), [Auto PR](docs/auto-pr.md), [Firebase Distribute All Platforms](docs/firebase-distribute-all.md).
 
 ### 1. Fork/Clone
 ```bash
