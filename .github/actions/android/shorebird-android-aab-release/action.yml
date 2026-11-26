@@ -9,6 +9,10 @@ inputs:
   package_name:
     type: string
     required: true
+  build_name:
+    required: false
+  build_number:
+    required: false
 runs:
   using: "composite"
   steps:
@@ -16,6 +20,8 @@ runs:
         uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/get-build-version@prod
         with:
           platform: "android"
+          build_name: ${{ inputs.build_name }}
+          build_number: ${{ inputs.build_number }}
       - shell: bash
         env:
           GRADLE_OPTS: "-Dorg.gradle.daemon=true -Dorg.gradle.caching=true -Dorg.gradle.vfs.watch=true"

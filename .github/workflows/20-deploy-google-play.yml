@@ -19,3 +19,5 @@ jobs:
           google_play_service_account_json: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           track: ${{ vars.TRACK }}
           package_name: ${{ vars.ANDROID_PACKAGE_NAME }}
+          build_name: ${{ vars.BUILD_NAME }}
+          build_number: ${{ vars.BUILD_NUMBER }}
