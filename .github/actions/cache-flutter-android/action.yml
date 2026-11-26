@@ -4,15 +4,22 @@ description: 'Caches Flutter, Dart, Gradle, and Android Native build artifacts f
 runs:
   using: "composite"
   steps:
+    - name: Check runner disk space
+      shell: bash
+      run: |
+        echo "=== Disk space ==="
+        df -h /
+        echo "=== Inodes ==="
+        df -i /
+        echo "=== Largest directories ==="
+        sudo du -xhd1 / 2>/dev/null | sort -hr | head -20 || true
     - uses: actions/cache@v4
       with:
         path: |
-          build/
-          .dart_tool/
           .pub-cache/
-        key: flutter-build-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}-${{ hashFiles('lib/**/*.dart') }}
+        key: flutter-deps-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
         restore-keys: |
-          flutter-build-${{ runner.os }}-
+          flutter-deps-${{ runner.os }}-
     - uses: actions/cache@v4
       with:
         path: |
