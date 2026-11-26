@@ -28,6 +28,15 @@ jobs:
           echo "== Disk after release =="
           df -h /
           du -sh build .dart_tool ~/.gradle /usr/local/lib/android/sdk 2>/dev/null || true
+          if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+            {
+              echo "### Disk After Release"
+              echo ""
+              echo '```'
+              df -h /
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Clean Gradle caches
         if: always()
         run: |

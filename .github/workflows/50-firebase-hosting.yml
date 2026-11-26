@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'push' && github.ref_name || github.base_ref }}
     steps:
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
@@ -33,3 +34,9 @@ jobs:
           projectId: ${{ vars.PROJECT_ID }}
           target: ${{ vars.TARGET }}
           channelId: ${{ github.event_name == 'push' && 'live' || '' }}
+      - name: Disk usage after deploy
+        if: always()
+        run: |
+          echo "== Disk after deploy =="
+          df -h /
+          du -sh build .dart_tool 2>/dev/null || true

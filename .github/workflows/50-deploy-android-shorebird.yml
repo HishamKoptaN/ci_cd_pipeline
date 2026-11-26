@@ -23,9 +23,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: ${{ inputs.flavor }}
+    concurrency:
+      group: deploy-android-shorebird-${{ github.repository }}-${{ inputs.flavor }}
+      cancel-in-progress: false
     outputs:
       changed: ${{ steps.deploy.outputs.changed }}
     steps:
+      - uses: HishamKoptaN/ci_cd_pipeline/.github/actions/core/free-disk-space@prod
       - uses: actions/checkout@v7
         with:
           fetch-depth: 1
@@ -99,3 +103,23 @@ jobs:
           name: android-apk-${{ inputs.flavor }}
           path: build/app/outputs/flutter-apk/*.apk
           retention-days: 1
+      - name: Disk usage after deploy
+        if: always()
+        run: |
+          echo "== Disk after deploy =="
+          df -h /
+          du -sh build .dart_tool ~/.gradle /usr/local/lib/android/sdk 2>/dev/null || true
+          if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+            {
+              echo "### Disk After Deploy"
+              echo ""
+              echo '```'
+              df -h /
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Clean Gradle caches
+        if: always()
+        run: |
+          rm -rf ~/.gradle/caches ~/.gradle/wrapper/dists build android/.gradle .dart_tool/build || true
+          df -h /
